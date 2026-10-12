@@ -1,0 +1,42 @@
+name: Build Turbo Racing APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Instalar Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Crear estructura Android
+        run: flutter create --platforms=android --project-name turbo_racing --org com.turboracing .
+
+      - name: Descargar dependencias
+        run: flutter pub get
+
+      - name: Revisar código
+        run: flutter analyze
+
+      - name: Compilar APK
+        run: flutter build apk --release
+
+      - name: Guardar APK para descargar
+        uses: actions/upload-artifact@v4
+        with:
+          name: Turbo-Racing-APK
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 14
